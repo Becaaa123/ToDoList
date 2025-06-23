@@ -19,7 +19,7 @@ body {
     background-repeat: no-repeat;
     font-family: 'Poppins', sans-serif;
 
-    color: var(--color-white);
+   
     display: flex;
     flex-direction: column;
     align-items: center;
