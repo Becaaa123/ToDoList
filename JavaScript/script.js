@@ -1,58 +1,125 @@
-const localStorageKey = 'to-do-list-gn'
-function validateIfExistsNewTask()
-{
-    let values     = JSON.parse(localStorage.getItem(localStorageKey) || "[]")
-    let inputValue = document.getElementById('input-new-task').value
-    let exists     = values.find(x => x.name == inputValue)
-    return !exists ? false : true
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+
+function formatarData(data) {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}/${ano}`;
 }
 
-function newTask()
-{
-    let input = document.getElementById('input-new-task')
-    input.style.border = ''
-
-    // validation
-    if(!input.value)
-    {
-        input.style.border = '1px solid red'
-        alert('Digite algo para inserir em sua lista')
-    }
-    else if(validateIfExistsNewTask())
-    {
-        alert('Já existe uma Tarefa com essa descrição')
-    }
-    else
-    {
-        // increment to localStorage
-        let values = JSON.parse(localStorage.getItem(localStorageKey) || "[]")
-        values.push({
-            name: input.value
-        })
-        localStorage.setItem(localStorageKey,JSON.stringify(values))
-        showValues()
-    }
-    input.value = ''
+function salvar() {
+  localStorage.setItem('tarefas', JSON.stringify(tarefas));
+  renderizarTarefas();
 }
 
-function showValues()
-{
-    let values = JSON.parse(localStorage.getItem(localStorageKey) || "[]")
-    let list = document.getElementById('to-do-list')
-    list.innerHTML = ''
-    for(let i = 0; i < values.length; i++)
-    {
-        list.innerHTML += `<li>${values[i]['name']}<button id='btn-ok' onclick='removeItem("${values[i]['name']}")'><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg></button></li>`
+function renderizarTarefas() {
+  document.getElementById("lista-tarefas").innerHTML = "";
+  document.getElementById("lista-importante").innerHTML = "";
+  document.getElementById("lista-concluidos").innerHTML = "";
+  document.getElementById("lista-lixeira").innerHTML = "";
+
+  tarefas.forEach((tarefa, index) => {
+    const li = document.createElement("li");
+    li.classList.add("tarefa");
+    li.innerHTML = `
+      <div>
+        <strong>${tarefa.titulo}</strong><br>
+        <small>${formatarData(tarefa.data)} - ${tarefa.categoria}</small><br>
+        <em>${tarefa.descricao}</em><br>
+        <span>Status: ${tarefa.status}</span>
+      </div>
+      <div class="botoes">
+        ${!tarefa.lixeira ? `
+          <button onclick="mudarStatus(${index})">🔁</button>
+          <button onclick="editarTarefa(${index})">✏️</button>
+          <button onclick="marcarImportante(${index})">⭐</button>
+          <button onclick="moverParaLixeira(${index})">🗑️</button>
+        ` : `
+          <button onclick="restaurar(${index})">↩️</button>
+          <button onclick="excluirTarefa(${index})">❌</button>
+        `}
+      </div>
+    `;
+
+    if (tarefa.lixeira) {
+      document.getElementById("lista-lixeira").appendChild(li);
+    } else if (tarefa.status === "concluída") {
+      document.getElementById("lista-concluidos").appendChild(li);
+    } else if (tarefa.importante) {
+      document.getElementById("lista-importante").appendChild(li);
+    } else {
+      document.getElementById("lista-tarefas").appendChild(li);
     }
+  });
 }
 
-function removeItem(data)
-{
-    let values = JSON.parse(localStorage.getItem(localStorageKey) || "[]")
-    let index = values.findIndex(x => x.name == data)
-    values.splice(index,1)
-    localStorage.setItem(localStorageKey,JSON.stringify(values))
-    showValues()
+document.getElementById("form-tarefa").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const titulo = document.getElementById("titulo").value;
+  const descricao = document.getElementById("descricao").value;
+  const data = document.getElementById("data").value;
+  const categoria = document.getElementById("categoria").value;
+  const status = document.getElementById("status").value;
+
+  if (this.dataset.editando) {
+    const index = this.dataset.editando;
+    tarefas[index] = { ...tarefas[index], titulo, descricao, data, categoria, status };
+    delete this.dataset.editando;
+  } else {
+    tarefas.push({ titulo, descricao, data, categoria, status, importante: false, lixeira: false });
+  }
+
+  this.reset();
+  salvar();
+});
+
+function editarTarefa(index) {
+  const tarefa = tarefas[index];
+  document.getElementById("titulo").value = tarefa.titulo;
+  document.getElementById("descricao").value = tarefa.descricao;
+  document.getElementById("data").value = tarefa.data;
+  document.getElementById("categoria").value = tarefa.categoria;
+  document.getElementById("status").value = tarefa.status;
+
+  document.getElementById("form-tarefa").dataset.editando = index;
 }
 
-showValues()
+function mudarStatus(index) {
+  const estados = ["pendente", "em andamento", "concluída"];
+  const atual = tarefas[index].status;
+  const proximo = estados[(estados.indexOf(atual) + 1) % estados.length];
+  tarefas[index].status = proximo;
+  salvar();
+}
+
+function marcarImportante(index) {
+  tarefas[index].importante = !tarefas[index].importante;
+  salvar();
+}
+
+function moverParaLixeira(index) {
+  tarefas[index].lixeira = true;
+  salvar();
+}
+
+function restaurar(index) {
+  tarefas[index].lixeira = false;
+  salvar();
+}
+
+function excluirTarefa(index) {
+  if (confirm("Deseja excluir permanentemente?")) {
+    tarefas.splice(index, 1);
+    salvar();
+  }
+}
+
+// Controle das abas
+document.querySelectorAll('.item-menu').forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.getAttribute('data-target');
+    document.querySelectorAll('.aba').forEach(sec => sec.classList.remove('ativa'));
+    document.getElementById(target).classList.add('ativa');
+  });
+});
+
+renderizarTarefas();
