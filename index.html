@@ -1,34 +1,58 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style/style.css">
-    <h1>Minhas <span>Tarefas</span></h1>
-    <h4><span>Organize </span>suas tarefas de forma simples e eficiente: Adicione, remova e visualize suas tarefas
-        pendentes<span>.</span></h4>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <title>ToDo List</title>
 </head>
-
 <body>
-    <div class="content">
-        <div class="content--add-item">
-            <input type="text" id="input-new-task" placeholder="Digite sua nova task">
-            <button onclick="newTask()" id="btn-new-task" title="Clique aqui para adicionar uma nova task">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg"
-                    viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z" />
-                </svg>
-            </button>
-        </div>
-        <div class="content--body">
-            <li id="to-do-list">
-            </li>
-        </div>
-    </div>
-</body>
-<script src="java/script.js"></script>
+  <h1>Minha To-Do List</h1>
 
+  <nav class="menu-lateral">
+    <ul>
+      <li class="item-menu" data-target="todos"><i class="bi bi-columns-gap"></i> Todos</li>
+      <li class="item-menu" data-target="importante"><i class="bi bi-star-fill"></i> Importante</li>
+      <li class="item-menu" data-target="concluidos"><i class="bi bi-check2-all"></i> Concluídos</li>
+      <li class="item-menu" data-target="lixeira"><i class="bi bi-trash"></i> Lixeira</li>
+    </ul>
+  </nav>
+
+  <main class="conteudo">
+    <section id="todos" class="aba ativa">
+      <h2>Todos</h2>
+      <form id="form-tarefa">
+        <input type="text" id="titulo" placeholder="Título" required>
+        <input type="text" id="descricao" placeholder="Descrição">
+        <input type="date" id="data" required>
+        <input type="text" id="categoria" placeholder="Categoria">
+        <select id="status">
+          <option value="pendente">Pendente</option>
+          <option value="em andamento">Em Andamento</option>
+          <option value="concluída">Concluída</option>
+        </select>
+        <button type="submit">Salvar Tarefa</button>
+      </form>
+      <ul id="lista-tarefas"></ul>
+    </section>
+
+    <section id="importante" class="aba">
+      <h2>Importante</h2>
+      <ul id="lista-importante"></ul>
+    </section>
+
+    <section id="concluidos" class="aba">
+      <h2>Concluídos</h2>
+      <ul id="lista-concluidos"></ul>
+    </section>
+
+    <section id="lixeira" class="aba">
+      <h2>Lixeira</h2>
+      <ul id="lista-lixeira"></ul>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
 </html>
